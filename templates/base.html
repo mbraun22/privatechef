@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}PrivateChefSpace{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    {% block head %}{% endblock %}
+</head>
+<body class="min-h-screen flex flex-col">
+    <header class="border-b">
+        <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+            <a href="/" class="text-2xl font-bold flex items-center gap-2">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                </svg>
+                PrivateChefSpace
+            </a>
+            
+            <nav class="flex items-center gap-4">
+                {% match user %}
+                {% when Some with (u) %}
+                    {% if u.role.to_string() == "chef" || u.role.to_string() == "admin" %}
+                        <a href="/chef-dashboard" class="px-4 py-2 text-sm font-medium hover:bg-gray-100 rounded-md">Chef Dashboard</a>
+                    {% endif %}
+                    <a href="/dashboard" class="px-4 py-2 text-sm font-medium hover:bg-gray-100 rounded-md">Dashboard</a>
+                    <div class="relative">
+                        <button class="h-10 w-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-semibold">
+                            {{ u.email.chars().next().unwrap_or('U') }}
+                        </button>
+                        <div class="hidden absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg border z-50" id="user-menu">
+                            <div class="px-4 py-3 border-b">
+                                <p class="text-sm font-medium">{{ u.email }}</p>
+                            </div>
+                            <a href="/logout" class="block px-4 py-2 text-sm hover:bg-gray-100">Log out</a>
+                        </div>
+                    </div>
+                {% when None %}
+                    <a href="/login" class="px-4 py-2 text-sm font-medium hover:bg-gray-100 rounded-md">Login</a>
+                    <a href="/login" class="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-md hover:bg-primary/90">Sign Up</a>
+                {% endmatch %}
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-1">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="border-t mt-auto">
+        <div class="container mx-auto px-4 py-8">
+            <div class="text-center text-sm text-muted-foreground">
+                <p>&copy; 2025 PrivateChefSpace. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

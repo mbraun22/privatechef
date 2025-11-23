@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - PrivateChefSpace{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    {% match user %}
+    {% when Some with (u) %}
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold">Dashboard</h1>
+        <p class="text-muted-foreground">Welcome back, {{ u.email }}</p>
+    </div>
+
+    <div class="grid gap-6 md:grid-cols-2">
+        <div class="border rounded-lg p-6">
+            <h2 class="text-xl font-semibold mb-2">Your Profile</h2>
+            <p class="text-sm text-muted-foreground mb-4">Manage your account settings</p>
+            <div class="space-y-2">
+                <p class="text-sm text-muted-foreground">
+                    Email: {{ u.email }}
+                </p>
+                <p class="text-sm text-muted-foreground">
+                    Role: <span class="capitalize font-medium">{{ u.role.to_string() }}</span>
+                </p>
+            </div>
+        </div>
+
+        {% if u.role.to_string() == "chef" || u.role.to_string() == "admin" %}
+            <div class="border rounded-lg p-6">
+                <h2 class="text-xl font-semibold mb-2">Chef Dashboard</h2>
+                <p class="text-sm text-muted-foreground mb-4">Manage your chef profile and menus</p>
+                <p class="text-sm text-muted-foreground">
+                    Visit the Chef Dashboard to manage your profile, menus, and bookings.
+                </p>
+                <a href="/chef-dashboard" class="mt-4 inline-block px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90">
+                    Go to Chef Dashboard
+                </a>
+            </div>
+        {% else %}
+            <div class="border rounded-lg p-6">
+                <h2 class="text-xl font-semibold mb-2">Become a Chef</h2>
+                <p class="text-sm text-muted-foreground mb-4">Start your culinary journey</p>
+                <p class="text-sm text-muted-foreground">
+                    Contact an administrator to upgrade your account to a chef role and start accepting bookings.
+                </p>
+            </div>
+        {% endif %}
+    </div>
+    {% when None %}
+    <div class="text-center py-16">
+        <p>Please login to access the dashboard</p>
+    </div>
+    {% endmatch %}
+</div>
+{% endblock %}
+

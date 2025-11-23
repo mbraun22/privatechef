@@ -1,0 +1,307 @@
+{% extends "base.html" %}
+
+{% block title %}Chef Dashboard - PrivateChefSpace{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    {% match error %}
+    {% when Some with (err) %}
+        <div class="mb-4 p-4 bg-red-50 border border-red-200 text-red-800 rounded-md">
+            <p class="font-medium">Error</p>
+            <p class="text-sm">{{ err }}</p>
+        </div>
+    {% when None %}
+    {% endmatch %}
+
+    {% match success %}
+    {% when Some with (msg) %}
+        <div class="mb-4 p-4 bg-green-50 border border-green-200 text-green-800 rounded-md">
+            <p class="font-medium">Success</p>
+            <p class="text-sm">{{ msg }}</p>
+        </div>
+    {% when None %}
+    {% endmatch %}
+
+    {% match user %}
+    {% when Some with (u) %}
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-bold">Chef Dashboard</h1>
+            <p class="text-muted-foreground">Manage your profile, menus, and bookings</p>
+        </div>
+        {% match chef %}
+        {% when None %}
+            <button 
+                type="button"
+                onclick="document.getElementById('chef-form').classList.toggle('hidden')" 
+                class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 cursor-pointer"
+                aria-label="Create Chef Profile"
+            >
+                Create Chef Profile
+            </button>
+        {% when Some with (_) %}
+        {% endmatch %}
+    </div>
+
+    {% match chef %}
+    {% when Some with (c) %}
+        <div class="border rounded-lg p-6 mb-8">
+            <h2 class="text-2xl font-semibold mb-2">{{ c.chef_name }}</h2>
+            {% match c.business_name %}
+            {% when Some with (name) %}
+                <p class="text-muted-foreground mb-4">{{ name }}</p>
+            {% when None %}
+            {% endmatch %}
+            {% match c.bio %}
+            {% when Some with (bio) %}
+                <p class="mb-4">{{ bio }}</p>
+            {% when None %}
+            {% endmatch %}
+            {% match c.slug %}
+            {% when Some with (slug) %}
+                <div class="mt-4">
+                    <p class="text-sm text-muted-foreground mb-2">Public Profile URL:</p>
+                    <a href="/chef/{{ slug }}" class="text-primary hover:underline">
+                        /chef/{{ slug }}
+                    </a>
+                </div>
+            {% when None %}
+            {% endmatch %}
+        </div>
+    {% when None %}
+    {% endmatch %}
+
+    <!-- Create Chef Profile Form -->
+    {% match chef %}
+    {% when None %}
+    <div id="chef-form" class="hidden mb-8 border rounded-lg p-6">
+        <h2 class="text-2xl font-semibold mb-4">Create Chef Profile</h2>
+        <form method="POST" action="/chef-dashboard/create-chef" class="space-y-4">
+            <div>
+                <label for="chef_name" class="block text-sm font-medium mb-1">Chef Name *</label>
+                <input type="text" id="chef_name" name="chef_name" required class="w-full px-3 py-2 border rounded-md">
+            </div>
+            <div>
+                <label for="business_name" class="block text-sm font-medium mb-1">Business Name</label>
+                <input type="text" id="business_name" name="business_name" class="w-full px-3 py-2 border rounded-md">
+            </div>
+            <div>
+                <label for="bio" class="block text-sm font-medium mb-1">Bio</label>
+                <textarea id="bio" name="bio" rows="3" class="w-full px-3 py-2 border rounded-md"></textarea>
+            </div>
+            <div>
+                <label for="location" class="block text-sm font-medium mb-1">Location</label>
+                <input type="text" id="location" name="location" class="w-full px-3 py-2 border rounded-md">
+            </div>
+            <div>
+                <label for="hourly_rate" class="block text-sm font-medium mb-1">Hourly Rate ($)</label>
+                <input type="number" id="hourly_rate" name="hourly_rate" step="0.01" class="w-full px-3 py-2 border rounded-md">
+            </div>
+            <div>
+                <label for="cuisine_types" class="block text-sm font-medium mb-1">Cuisine Types (comma-separated)</label>
+                <input type="text" id="cuisine_types" name="cuisine_types" placeholder="Italian, French, Mediterranean" class="w-full px-3 py-2 border rounded-md">
+            </div>
+            <div class="flex gap-2">
+                <button type="submit" class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90">
+                    Create Profile
+                </button>
+                <button type="button" onclick="document.getElementById('chef-form').classList.add('hidden')" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+    {% when Some with (_) %}
+    {% endmatch %}
+
+    <div class="mb-8">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-2xl font-semibold">Menus</h2>
+            {% match chef %}
+            {% when Some with (_) %}
+            <button 
+                type="button"
+                onclick="document.getElementById('menu-form').classList.toggle('hidden')" 
+                class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 cursor-pointer"
+                aria-label="Create Menu"
+            >
+                Create Menu
+            </button>
+            {% when None %}
+            <p class="text-sm text-muted-foreground">Create a chef profile first to add menus</p>
+            {% endmatch %}
+        </div>
+
+        <!-- Create Menu Form -->
+        {% match chef %}
+        {% when Some with (_) %}
+        <div id="menu-form" class="hidden mb-4 border rounded-lg p-6">
+            <h3 class="text-xl font-semibold mb-4">Create Menu</h3>
+            <form method="POST" action="/chef-dashboard/create-menu" class="space-y-4">
+                <div>
+                    <label for="menu_name" class="block text-sm font-medium mb-1">Menu Name *</label>
+                    <input type="text" id="menu_name" name="name" required class="w-full px-3 py-2 border rounded-md">
+                </div>
+                <div>
+                    <label for="menu_description" class="block text-sm font-medium mb-1">Description</label>
+                    <textarea id="menu_description" name="description" rows="2" class="w-full px-3 py-2 border rounded-md"></textarea>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="menu_price" class="block text-sm font-medium mb-1">Price per Person ($)</label>
+                        <input type="number" id="menu_price" name="price_per_person" step="0.01" class="w-full px-3 py-2 border rounded-md">
+                    </div>
+                    <div>
+                        <label for="menu_min_guests" class="block text-sm font-medium mb-1">Minimum Guests</label>
+                        <input type="number" id="menu_min_guests" name="minimum_guests" min="1" value="2" class="w-full px-3 py-2 border rounded-md">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="menu_cuisine" class="block text-sm font-medium mb-1">Cuisine Type</label>
+                        <input type="text" id="menu_cuisine" name="cuisine_type" class="w-full px-3 py-2 border rounded-md">
+                    </div>
+                    <div>
+                        <label for="menu_duration" class="block text-sm font-medium mb-1">Duration (hours)</label>
+                        <input type="number" id="menu_duration" name="duration_hours" step="0.5" class="w-full px-3 py-2 border rounded-md">
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <button type="submit" class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90">
+                        Create Menu
+                    </button>
+                    <button type="button" onclick="document.getElementById('menu-form').classList.add('hidden')" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+        {% when None %}
+        {% endmatch %}
+
+        <div class="grid md:grid-cols-2 gap-4">
+            {% for menu_with_items in menus_with_items %}
+                <div class="border rounded-lg p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="text-xl font-semibold mb-2">{{ menu_with_items.menu.name }}</h3>
+                            {% match menu_with_items.menu.description %}
+                            {% when Some with (desc) %}
+                                <p class="text-sm text-muted-foreground mb-4">{{ desc }}</p>
+                            {% when None %}
+                            {% endmatch %}
+                        </div>
+                    </div>
+
+                    <!-- Menu Items List -->
+                    <div class="mb-4">
+                        <h4 class="text-sm font-semibold mb-2">Dishes</h4>
+                        {% if menu_with_items.items.len() > 0 %}
+                            <div class="space-y-2">
+                                {% for item in menu_with_items.items %}
+                                    <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                                        <div class="flex-1">
+                                            <p class="font-medium text-sm">{{ item.name }}</p>
+                                            {% match item.description %}
+                                            {% when Some with (desc) %}
+                                                <p class="text-xs text-muted-foreground">{{ desc }}</p>
+                                            {% when None %}
+                                            {% endmatch %}
+                                        </div>
+                                        <div class="ml-4 text-right">
+                                            {% match item.quantity %}
+                                            {% when Some with (qty) %}
+                                                <p class="text-sm font-semibold">{{ qty }} plate(s)</p>
+                                            {% when None %}
+                                                <p class="text-xs text-muted-foreground">1 plate</p>
+                                            {% endmatch %}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-sm text-muted-foreground">No dishes yet</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Add Menu Item Form -->
+                    <div class="mt-4 pt-4 border-t">
+                        <button 
+                            type="button"
+                            onclick="document.getElementById('menu-item-form-{{ menu_with_items.menu.id }}').classList.toggle('hidden')" 
+                            class="text-sm px-3 py-1 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
+                        >
+                            + Add Dish
+                        </button>
+                        <div id="menu-item-form-{{ menu_with_items.menu.id }}" class="hidden mt-3 p-3 bg-gray-50 rounded">
+                            <form method="POST" action="/chef-dashboard/create-menu-item" class="space-y-2">
+                                <input type="hidden" name="menu_id" value="{{ menu_with_items.menu.id }}">
+                                <div>
+                                    <input 
+                                        type="text" 
+                                        name="name" 
+                                        placeholder="Dish name *" 
+                                        required 
+                                        class="w-full px-2 py-1 text-sm border rounded-md"
+                                    >
+                                </div>
+                                <div>
+                                    <textarea 
+                                        name="description" 
+                                        placeholder="Description (optional)" 
+                                        rows="2"
+                                        class="w-full px-2 py-1 text-sm border rounded-md"
+                                    ></textarea>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <input 
+                                            type="text" 
+                                            name="course_type" 
+                                            placeholder="Course (e.g., Appetizer)" 
+                                            class="w-full px-2 py-1 text-sm border rounded-md"
+                                        >
+                                    </div>
+                                    <div>
+                                        <input 
+                                            type="number" 
+                                            name="quantity" 
+                                            placeholder="Plates *" 
+                                            min="1" 
+                                            value="1" 
+                                            required
+                                            class="w-full px-2 py-1 text-sm border rounded-md"
+                                        >
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <input type="checkbox" id="featured-{{ menu_with_items.menu.id }}" name="is_featured">
+                                    <label for="featured-{{ menu_with_items.menu.id }}" class="text-xs">Feature on profile</label>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button type="submit" class="text-sm px-3 py-1 bg-primary text-primary-foreground rounded hover:bg-primary/90">
+                                        Add Dish
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        onclick="document.getElementById('menu-item-form-{{ menu_with_items.menu.id }}').classList.add('hidden')" 
+                                        class="text-sm px-3 py-1 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% when None %}
+    <div class="text-center py-16">
+        <p>Access denied. Chef or admin role required.</p>
+    </div>
+    {% endmatch %}
+</div>
+{% endblock %}
+

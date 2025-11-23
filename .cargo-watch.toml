@@ -1,0 +1,31 @@
+# Cargo Watch configuration for hot reload
+# This file configures cargo-watch behavior
+
+# Ignore patterns (files/directories to ignore)
+[ignore]
+# Ignore build artifacts
+ignore = [
+    "target",
+    "*.log",
+    ".git",
+    ".env",
+    "*.swp",
+    "*.swo",
+    "*~",
+]
+
+# Watch patterns (what to watch)
+# By default, cargo-watch watches:
+# - Cargo.toml and Cargo.lock
+# - All .rs files in src/
+# - We also explicitly watch templates/ for Askama template changes
+
+# Clear screen on rebuild
+clear = true
+
+# Show why cargo-watch triggered
+why = true
+
+# Delay before running (debounce in seconds)
+delay = 0.5
+
