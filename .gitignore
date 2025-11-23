@@ -20,6 +20,9 @@ pids/
 # Build output
 dist/
 build/
+target/
+*.rlib
+*.rmeta
 
 # IDE
 .vscode/
